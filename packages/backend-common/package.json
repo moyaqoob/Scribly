@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "exports": {
     "./config": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "start" : "node ./src/index.ts"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",

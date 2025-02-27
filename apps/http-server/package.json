@@ -25,6 +25,9 @@
   "license": "ISC",
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@repo/backend-common" : "workspace:*",
+    "@repo/common" : "workspace:*",
+    "@repo/db" : "workspace:*",
     "prisma": "6.4.1"
   }
 }

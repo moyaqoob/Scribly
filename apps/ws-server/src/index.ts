@@ -3,9 +3,9 @@ import { WebSocketServer } from 'ws';
 import jwt, { JwtPayload } from "jsonwebtoken";
 import {JWT_SECRET} from "@repo/backend-common/config"
 
-const wss = new WebSocketServer({ port: 8080 });
+const server = new WebSocketServer({ port: 8080 });
 
-wss.on('connection', (ws,request) => {
+server.on('connection', (ws,request) => {
    const url = request.url;
 
 
@@ -16,7 +16,10 @@ wss.on('connection', (ws,request) => {
     if(!decoded || !(decoded as JwtPayload).userId){
         ws.close()
         return;
+    }else{
+        ws.send("Pong mf")
     }
+    
 
     ws.on('close', () => {
         console.log('Client disconnected');

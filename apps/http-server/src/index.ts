@@ -4,12 +4,14 @@ import  {JWT_SECRET} from "@repo/backend-common/config"
 import { middleware } from "./middleware.js"
 import {CreateUserSchema,SigninSchema,CreateRoomSchema} from "@repo/common/types"
 // import {prismaClient} from "@repo/db/client"
-import { prismaClient } from "@repo/db/client"
-import bcrypt from "bcrypt"
+import bcrypt from  "bcrypt"
+import  {prismaClient} from "@repo/db/prisma"
+import { parse } from "path"
 
 const app = express();
+app.use(express.json());
 
-//@ts-ignore
+// @ts-ignore
 app.post("/signup", async (req,res)=>{
     const parsedData = CreateUserSchema.safeParse(req.body);
     if(!parsedData.success){
@@ -19,25 +21,24 @@ app.post("/signup", async (req,res)=>{
         return res.status(400);
     }
     try{
-
-        const hashPassword = await bcrypt.hash(parsedData.data.password,10)
-        const user  = prismaClient.user.create({
+        await prismaClient.user.create({
             data:{
-                email : parsedData.data.username,
-                password : hashPassword,
-                name : parsedData.data.name,
-            },
+                email:parsedData.data?.username,
+                password:parsedData.data?.password,
+                name:parsedData.data?.name
+            }
         })
-        return res.json({
-            message:"User created successfully",
-            userId:(await user).id
+        res.json({
+            userId: parsedData.data.username
         })
 
     }catch(e){
         res.json({
-            message: "User Already exists"
+            message: "User already exists"
         })
     }
+    
+
 })
 
 //@ts-ignore

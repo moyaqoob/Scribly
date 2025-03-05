@@ -14,27 +14,23 @@ declare global {
   // Extend Express types for custom middleware or properties
   namespace Express {
     interface Request {
-      userId?: {
-        id: string;
-        email: string;
-        role: string;
-      };
-      customData?: any; // Add custom properties to the Request object
+      userId?: string; // Ensure this line is correct
+      // Add custom properties to the Request object
     }
 
     interface Response {
       customResponseData?: any; // Add custom properties to the Response object
     }
 
-    interface Application {
-      customMiddleware: (options?: any) => void;
+    interface decoded {
+      userId: string;
     }
   }
 
   // Augment Node.js global types (e.g., process.env)
   namespace NodeJS {
     interface ProcessEnv {
-      NODE_ENV: 'development' | 'production' | 'test';
+      NODE_ENV: "development" | "production" | "test";
       PORT: string;
       DATABASE_URL: string;
       JWT_SECRET: string;

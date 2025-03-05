@@ -3,9 +3,34 @@ import { WebSocketServer } from 'ws';
 import jwt, { JwtPayload } from "jsonwebtoken";
 import {JWT_SECRET} from "@repo/backend-common/config"
 
-const server = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: 8080 });
 
-server.on('connection', (ws,request) => {
+interface User {
+    ws:WebSocket,
+    room : string,
+    chat : string
+}
+
+const user:User[] = []
+
+function checkUser(token:string): string | null{
+    const decoded = jwt.verify(JWT_SECRET,token) as JwtPayload;
+
+    if(typeof decoded === "string") { 
+            return null
+    }
+
+    if(!decoded || !decoded.userId){
+        return null;
+    }
+
+    return decoded.userId;
+    console.log(decoded.userId)
+}
+
+
+
+wss.on('connection', (ws,request) => {
    const url = request.url;
 
 

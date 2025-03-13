@@ -1,20 +1,23 @@
 
-import { WebSocketServer } from 'ws';
+import WebSocket, { WebSocketServer } from 'ws';
 import jwt, { JwtPayload } from "jsonwebtoken";
 import {JWT_SECRET} from "@repo/backend-common/config"
-
+import { decoded } from './types.js';
 const wss = new WebSocketServer({ port: 8080 });
+import {prismaClient}  from "@repo/db/prisma"
 
 interface User {
-    ws:WebSocket,
-    room : string,
-    chat : string
+    rooms : string[],
+    userId : string
+    ws:WebSocket
+
 }
 
-const user:User[] = []
+const users: User[] = []
 
 function checkUser(token:string): string | null{
-    const decoded = jwt.verify(JWT_SECRET,token) as JwtPayload;
+    try{
+    const decoded = jwt.verify(JWT_SECRET,token) as decoded;
 
     if(typeof decoded === "string") { 
             return null
@@ -26,6 +29,10 @@ function checkUser(token:string): string | null{
 
     return decoded.userId;
     console.log(decoded.userId)
+    } catch(e){
+        return "cant decoded the user"
+    }
+    
 }
 
 
@@ -36,19 +43,68 @@ wss.on('connection', (ws,request) => {
 
    const queryparams = new URLSearchParams(url?.split('?')[1]);
    const token = queryparams.get("token") || "";
-   const decoded = jwt.verify(token,JWT_SECRET)
+    const userId = checkUser(token)
 
-    if(!decoded || !(decoded as JwtPayload).userId){
+    if(userId==null){
         ws.close()
-        return;
-    }else{
-        ws.send("Pong mf")
+        return null;
     }
-    
 
-    ws.on('close', () => {
-        console.log('Client disconnected');
-    });
+    users.push({
+        userId,
+        rooms:[],
+        ws
+    })
+
+    ws.on("message",async function message(data){
+        let parsedData;
+
+        if(typeof data != "string"){
+            return;
+        }else{
+            parsedData = JSON.parse(data)
+        }
+        
+
+        if(parsedData.type == "join_room"){
+            const user = users.find(x => x.ws === ws);
+            user?.rooms.push(parsedData.roomsId)
+        }
+
+        if(parsedData.type == "leave_room"){
+            const user = users.find(x => x.ws === ws);
+            if(!user){
+                return;
+            }
+            user?.rooms == user?.rooms.filter(x => x === parsedData.roomId)
+        }
+
+        if(parsedData.type == "chat"){
+            const roomId = parsedData.roomsId;
+            const message  = parsedData.message;
+
+            await prismaClient.chat.create({
+                data: {
+                  roomId,
+                  message,
+                  userId
+                }
+              });
+
+            users.forEach(user=>{
+                if(user.rooms.includes(roomId)){
+                    user.ws.send(JSON.stringify({
+                        type : parsedData.type,
+                        message:message,
+                        roomId 
+                    }))
+                }
+            })
+        }
+    })
+
 });
+
+
 
 console.log('WebSocket server is running on ws://localhost:8080');({ port: 8080 });

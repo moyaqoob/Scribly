@@ -104,12 +104,12 @@ app.post("/room", middleware, async (req, res) => {
     });
     return;
   }
-  //@ts-ignore
+
   const userId = req.userId;
 
   try {
     const room = await prismaClient.room.create({
-      //@ts-ignore
+    //   @ts-ignore
       data: {
         slug: parsedData.data.roomname,
         adminId: userId,
@@ -125,5 +125,40 @@ app.post("/room", middleware, async (req, res) => {
     });
   }
 });
+// @ts-ignore
+
+app.get("/chats/:roomId",async(req,res)=>{
+    try{
+      const parsedData = CreateRoomSchema.parse(req.params.roomId);
+      
+      const messages = await prismaClient.chat.findMany({
+        where:{
+          roomId:parsedData.roomname
+        },
+        orderBy:{
+          id:"desc"
+        },
+        take:50
+      })
+
+    }catch(e){
+        console.log(e);
+        res.json({
+          messages:[]
+        })
+    }
+})
+
+app.get("/room/:slug",async(req,res)=>{
+  const slug = req.params.slug;
+  const room = prismaClient.room.findFirst({
+    where:{
+      slug
+    }
+  });
+  res.json({
+    room
+  })
+})
 
 app.listen(3001);

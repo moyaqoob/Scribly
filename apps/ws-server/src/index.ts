@@ -60,7 +60,7 @@ wss.on('connection', (ws,request) => {
         let parsedData;
 
         if(typeof data != "string"){
-            return;
+            parsedData =  JSON.parse(data.toString())
         }else{
             parsedData = JSON.parse(data)
         }

@@ -1,13 +1,13 @@
-import React from "react"
+import React from 'react'
 
-
-function App(){
+const page = () => {
   return (
     <div>
-       app component
+       <p className='text-3xl font-semibold uppercase text-center text-cyan-600'>Excalidraw App
+
+       </p>
     </div>
   )
 }
 
-
-export default App
+export default page

@@ -1,0 +1,1 @@
+{"root":["./http-server/globals.d.ts","./http-server/dist/index.d.ts","./http-server/dist/middleware.d.ts","./http-server/dist/types.d.ts","./http-server/src/index.ts","./http-server/src/middleware.ts","./http-server/src/types.ts"],"version":"5.8.2"}
